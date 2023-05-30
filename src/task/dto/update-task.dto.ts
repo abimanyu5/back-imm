@@ -1,5 +1,10 @@
+import { IsOptional, IsString } from 'class-validator';
 export class UpdateTaskDto {
-  task_name: string;
+  @IsOptional()
+  @IsString()
+  task_name?: string;
 
-  task_description: string;
+  @IsOptional()
+  @IsString()
+  task_description?: string;
 }
