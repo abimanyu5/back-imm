@@ -13,8 +13,10 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { AuthGuard } from './auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiTags, ApiBearerAuth, ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
@@ -29,13 +31,28 @@ export class AuthController {
     return this.authService.login(data);
   }
 
+  @ApiBearerAuth('accessToken')
   @UseGuards(AuthGuard)
   @Get('profile')
   async profile(@Req() req) {
-    return await this.authService.profile(req.id);
+    return await this.authService.profile(req.user.id);
   }
 
   @UseGuards(AuthGuard)
+  @ApiBearerAuth('accessToken')
+  @UseGuards(AuthGuard)
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        avatar: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
   @UseInterceptors(
     FileInterceptor('avatar', {
       storage: diskStorage({

@@ -3,11 +3,17 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { tasks } from './data/task';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { REQUEST } from '@nestjs/core';
+import { Inject } from '@nestjs/common';
 
 @Injectable()
 export class TaskService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Inject(REQUEST) private req: any,
+  ) {}
   async createTask(data: CreateTaskDto) {
+    data.id_user = this.req.user.id;
     if (!data.task_name) {
       return {
         statusCode: 400,
@@ -23,7 +29,9 @@ export class TaskService {
     };
   }
   async getAllTask() {
-    const getAllData = await this.prisma.tasks.findMany();
+    const getAllData = await this.prisma.tasks.findMany({
+      where: { id_user: this.req.user.id },
+    });
     return {
       statusCode: 200,
       data: getAllData,
@@ -34,6 +42,7 @@ export class TaskService {
     const getTaskById = await this.prisma.tasks.findFirst({
       where: {
         id: id,
+        id_user: this.req.user.id,
       },
     });
     if (getTaskById === null) {
@@ -50,6 +59,7 @@ export class TaskService {
 
   async updateTask(id, data: UpdateTaskDto) {
     try {
+      data.id_user = this.req.user.id;
       const updateData = await this.prisma.tasks.update({
         data: data,
         where: {

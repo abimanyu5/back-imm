@@ -73,10 +73,10 @@ export class AuthService {
         id: user_id,
       },
       select: {
-        id: true,
         name: true,
         email: true,
         avatar: true,
+        tasks: true,
       },
     });
     if (dataProfile) {
